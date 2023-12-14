@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <defs
+      id="defs1">
+      <linearGradient
+         id="linearGradient7">
+         <stop
+            style="stop-color:#3a001e;stop-opacity:1;"
+            offset="0"
+            id="stop7" />
+         <stop
+            style="stop-color:#3a001e;stop-opacity:0;"
+            offset="1"
+            id="stop8" />
+      </linearGradient>
+      <linearGradient
+         id="linearGradient5">
+         <stop
+            style="stop-color:#3a001e;stop-opacity:1;"
+            offset="0"
+            id="stop5" />
+         <stop
+            style="stop-color:#3a001e;stop-opacity:0;"
+            offset="1"
+            id="stop6" />
+      </linearGradient>
+      <linearGradient
+         id="linearGradient16">
+         <stop
+            style="stop-color:#c10b0b;stop-opacity:1;"
+            offset="0"
+            id="stop16" />
+         <stop
+            style="stop-color:#c10b0b;stop-opacity:0;"
+            offset="1"
+            id="stop17" />
+      </linearGradient>
+      <linearGradient
+         xlink:href="#linearGradient16"
+         id="linearGradient17"
+         x1="324.78589"
+         y1="171.70065"
+         x2="246.52261"
+         y2="151.52921"
+         gradientUnits="userSpaceOnUse" />
+      <linearGradient
+         xlink:href="#linearGradient5"
+         id="linearGradient6"
+         x1="293.50165"
+         y1="268.22577"
+         x2="216.52261"
+         y2="152.64951"
+         gradientUnits="userSpaceOnUse" />
+      <linearGradient
+         xlink:href="#linearGradient7"
+         id="linearGradient8"
+         x1="182.47589"
+         y1="273.97473"
+         x2="195.90521"
+         y2="154.57552"
+         gradientUnits="userSpaceOnUse" />
+   </defs>
+   <g
+      fill="none"
+      stroke-width="12"
+   >
+      <path
+         stroke="url(#linearGradient17)"
+         d="M 246.523 151.529 L 324.786 171.701 L 404.347 145.701"
+         id="path15" />
+      <path
+         stroke="url(#linearGradient6)"
+         d="M 365.04779,459.16534 345.0481,357.75456 293.50165,268.22577 C 266.49744,231.15525 241.1976,191.23379 215.04626,152.73665"
+         id="path8" />
+      <path
+         stroke="url(#linearGradient8)"
+         d="m 108.64884,458.15958 64.69612,-83.47101 9.13093,-100.71385 13.42932,-119.39921"
+         id="path17" />
+      <path
+         stroke="#c10b0b"
+         d="M 155.113 153.701 L 207.735 209.803 L 242.523 126.649"
+         id="path14" />
+   </g>
+   <g
+      fill="#fff"
+      stroke-width="12"
+   >
+      <circle
+         stroke="#3a001e"
+         fill="none"
+         opacity="0.2"
+         id="path18"
+         cx="207.7354"
+         cy="75.598244"
+         r="42" />
+      <g stroke="#c10b0b">
+         <circle
+            id="path1"
+            cx="242.52261"
+            cy="126.6495"
+            r="20" />
+         <circle
+            id="path2"
+            cx="207.7354"
+            cy="209.80307"
+            r="20" />
+         <circle
+            id="path3"
+            cx="155.11324"
+            cy="153.70065"
+            r="20" />
+         <circle
+            id="path4"
+            cx="404.34668"
+            cy="145.70065"
+            r="20" />
+         <circle
+            id="path5"
+            cx="324.78589"
+            cy="171.70065"
+            r="20" />
+
+      </g>
+      <g stroke="#63354d">
+         <circle
+            id="path13"
+            cx="293.50125"
+            cy="268.2262"
+            r="20.118828" />
+         <circle
+            id="path7"
+            cx="181.47035"
+            cy="274.98053"
+            r="20.118828" />
+      </g>
+      <g stroke="#3a001e">
+         <circle
+            id="path9"
+            cx="172.33894"
+            cy="375.69458"
+            r="20.118828" />
+         <circle
+            id="path10"
+            cx="107.64258"
+            cy="459.16534"
+            r="20.118828" />
+         <circle
+            id="path11"
+            cx="365.04779"
+            cy="459.16534"
+            r="20.118828" />
+         <circle
+            id="path12"
+            cx="345.04779"
+            cy="357.75433"
+            r="20.118828" />
+
+      </g>
+   </g>
+</svg>

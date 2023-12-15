@@ -1,5 +1,9 @@
 import type { TouchableOpacityProps } from 'react-native';
-export type ButtonColorMode = 'light' | 'primary';
+export type ButtonColorMode =
+  | 'light'
+  | 'primary'
+  | 'outlineLight'
+  | 'outlinePrimary';
 
 export interface ButtonProps extends TouchableOpacityProps {
   color?: ButtonColorMode;

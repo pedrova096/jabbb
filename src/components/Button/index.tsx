@@ -13,10 +13,22 @@ export const Button: React.FC<ButtonProps> = ({
   loading,
   ...props
 }) => {
-  const styleByMode = { primary: styles.primary, light: styles.light }[color];
-  const textColorByMode = ({ primary: 'light', light: 'primary' } as const)[
-    color
-  ];
+  const styleByMode = {
+    primary: styles.primary,
+    light: styles.light,
+    outlinePrimary: styles.outlinePrimary,
+    outlineLight: styles.outlineLight,
+  }[color];
+
+  const textColorByMode = (
+    {
+      primary: 'light',
+      light: 'primary',
+      outlinePrimary: 'primary',
+      outlineLight: 'light',
+    } as const
+  )[color];
+
   const loaderColor = (
     { primary: colors.light, light: colors.primary } as const
   )[color];

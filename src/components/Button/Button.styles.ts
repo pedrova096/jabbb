@@ -13,6 +13,14 @@ export const styles = StyleSheet.create({
   light: {
     backgroundColor: theme.colors.light,
   },
+  outlinePrimary: {
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+  },
+  outlineLight: {
+    borderWidth: 1,
+    borderColor: theme.colors.light,
+  },
   toBottom: {
     marginTop: 'auto',
   },

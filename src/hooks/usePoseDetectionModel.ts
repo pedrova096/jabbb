@@ -7,7 +7,7 @@ import {
   movenet,
 } from '@tensorflow-models/pose-detection';
 import { Camera } from 'expo-camera';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import tf from '@tensorflow/tfjs';
 import { bundleResourceIO } from '@tensorflow/tfjs-react-native';
 import { ExpoWebGLRenderingContext } from 'expo-gl';
@@ -18,13 +18,23 @@ enum ModelStatus {
   FAILED,
 }
 
+enum StreamStatus {
+  IDLE = 'IDLE',
+  READY = 'READY',
+  RUNNING = 'RUNNING',
+  STOPPED = 'STOPPED',
+}
+
 export const usePoseDetectionModel = (
   {
     autorender = true,
+    autostart = true,
   }: {
-    autorender: boolean;
+    autorender?: boolean;
+    autostart?: boolean;
   } = {
     autorender: true,
+    autostart: true,
   }
 ) => {
   const [{ model, status }, setModel] = useState<{
@@ -35,10 +45,20 @@ export const usePoseDetectionModel = (
   });
   const [latency, setLatency] = useState(0);
   const [poses, setPoses] = useState<Pose[]>();
+  const streamStatusRef = useRef(StreamStatus.IDLE);
+  const [streamStatus, setStreamStatus] = useReducer(
+    (_: unknown, action: StreamStatus) => {
+      streamStatusRef.current = action;
+      return action;
+    },
+    StreamStatus.IDLE
+  );
+
   // - null: unset (initial value).
   // - 0: animation frame/loop has been canceled.
   // - >0: animation frame has been scheduled.
   const rafId = useRef<number | null>(null);
+  const loopRef = useRef<() => void>();
 
   useEffect(() => {
     async function prepare() {
@@ -96,6 +116,7 @@ export const usePoseDetectionModel = (
   //   }
   // }, [dateTrigger]);
 
+  // TODO: Check if we could get updatePreview and gl from the ref.
   const onCameraStream = async (
     images: IterableIterator<tf.Tensor3D>,
     updatePreview: () => void,
@@ -103,7 +124,9 @@ export const usePoseDetectionModel = (
   ) => {
     console.log('Camera stream is ready!');
 
-    const loop = async () => {
+    setStreamStatus(StreamStatus.READY);
+
+    loopRef.current = async () => {
       // Get the tensor and run pose detection.
       const imageTensor = images.next().value as tf.Tensor3D;
 
@@ -129,16 +152,37 @@ export const usePoseDetectionModel = (
         gl.endFrameEXP();
       }
 
-      rafId.current = requestAnimationFrame(loop);
+      if (streamStatusRef.current !== StreamStatus.STOPPED) {
+        rafId.current = requestAnimationFrame(loopRef.current!);
+
+        if (streamStatusRef.current !== StreamStatus.RUNNING) {
+          setStreamStatus(StreamStatus.RUNNING);
+        }
+      }
     };
 
-    loop();
+    if (autostart) {
+      loopRef.current();
+    }
   };
 
   const isLoading = status === ModelStatus.LOADING;
   const isLoaded = status === ModelStatus.LOADED;
 
   const handleCameraReady = () => {};
+
+  const runStream = () => {
+    if (loopRef.current != null) {
+      if (streamStatus !== StreamStatus.RUNNING) {
+        setStreamStatus(StreamStatus.READY);
+        loopRef.current();
+      }
+    }
+  };
+
+  const stopStream = () => {
+    setStreamStatus(StreamStatus.STOPPED);
+  };
 
   return {
     poses,
@@ -147,5 +191,7 @@ export const usePoseDetectionModel = (
     isLoaded,
     onCameraStream,
     handleCameraReady,
+    runStream,
+    stopStream,
   };
 };

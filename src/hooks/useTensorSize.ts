@@ -1,5 +1,4 @@
-import { Orientation } from 'expo-screen-orientation';
-import { IS_ANDROID, IS_IOS } from '../constants/config';
+import { IS_ANDROID, IS_IOS } from '~/constants/config';
 
 //
 // For movenet, the size here doesn't matter too much because the model will

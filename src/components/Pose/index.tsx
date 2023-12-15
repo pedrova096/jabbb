@@ -1,6 +1,6 @@
 import { Pose as PoseType } from '@tensorflow-models/pose-detection';
 import { StyleSheet, View } from 'react-native';
-import { IS_ANDROID } from '../../constants/config';
+import { IS_ANDROID } from '~/constants/config';
 import { Circle, Svg } from 'react-native-svg';
 import { CAM_PREVIEW_HEIGHT, CAM_PREVIEW_WIDTH } from '../TensorCamera';
 

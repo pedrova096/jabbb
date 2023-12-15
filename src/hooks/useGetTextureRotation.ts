@@ -1,6 +1,6 @@
 import { CameraType } from 'expo-camera';
 import { Orientation } from 'expo-screen-orientation';
-import { IS_ANDROID } from '../constants/config';
+import { IS_ANDROID } from '~/constants/config';
 
 export const useGetTextureRotation = ({
   cameraType,

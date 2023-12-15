@@ -116,7 +116,7 @@ export const usePoseDetectionModel = (
       const latency = Date.now() - startTs;
       console.log(`Latency: ${latency}ms`);
       // setLatency(latency);
-      // setPoses(poses);
+      setPoses(poses);
       tf.dispose([imageTensor]);
 
       if (rafId.current === 0) {

@@ -6,6 +6,7 @@ import { usePoseDetectionModel } from './src/hooks/usePoseDetectionModel';
 import { useTensorSize } from './src/hooks/useTensorSize';
 import { useOrientation } from './src/hooks/useOrientation';
 import type { Camera } from 'expo-camera';
+import { Pose } from './src/components/Pose';
 
 export default function App() {
   const cameraRef = useRef<{ camera: Camera }>(null);
@@ -34,6 +35,13 @@ export default function App() {
         onCameraReady={handleCameraReady}
         resizeWidth={tensorWidth}
         resizeHeight={tensorHeight}
+      />
+      <Pose
+        isBackCamera={false}
+        isPortrait={isPortrait}
+        poses={poses}
+        tensorWidth={tensorWidth}
+        tensorHeight={tensorHeight}
       />
     </View>
   );

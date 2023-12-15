@@ -1,12 +1,12 @@
 import { View } from 'react-native';
 import { useRef } from 'react';
-import { Loading } from './src/components/Loading';
-import { TensorCamera } from './src/components/TensorCamera';
-import { usePoseDetectionModel } from './src/hooks/usePoseDetectionModel';
-import { useTensorSize } from './src/hooks/useTensorSize';
-import { useOrientation } from './src/hooks/useOrientation';
+import { Loading } from '~/components/Loading';
+import { TensorCamera } from '~/components/TensorCamera';
+import { usePoseDetectionModel } from '~/hooks/usePoseDetectionModel';
+import { useTensorSize } from '~/hooks/useTensorSize';
+import { useOrientation } from '~/hooks/useOrientation';
 import type { Camera } from 'expo-camera';
-import { Pose } from './src/components/Pose';
+import { Pose } from '~/components/Pose';
 
 export default function App() {
   const cameraRef = useRef<{ camera: Camera }>(null);

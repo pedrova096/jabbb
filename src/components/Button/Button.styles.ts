@@ -14,11 +14,11 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.colors.light,
   },
   outlinePrimary: {
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: theme.colors.primary,
   },
   outlineLight: {
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: theme.colors.light,
   },
   toBottom: {

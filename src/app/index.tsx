@@ -18,7 +18,9 @@ const styles = StyleSheet.create({
 export default function Home() {
   return (
     <View style={styles.container}>
-      <Button color="primary">Detect</Button>
+      <Link href="/detection" asChild>
+        <Button color="primary">Detect</Button>
+      </Link>
       <Link href="/capture_pose" asChild>
         <Button color="primary" style={styles.mt10}>
           Capture Pose

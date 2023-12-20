@@ -18,6 +18,7 @@ interface PoseProps {
   tensorWidth: number;
   tensorHeight: number;
   center?: boolean;
+  centerColor?: string;
 }
 
 type PoseObject = {
@@ -55,10 +56,11 @@ const convertPoseToPoseObject = ({
   tensorHeight: number;
 }) => {
   const poseObject: PoseObject = {};
+
   const box = {
-    xMin: tensorWidth,
+    xMin: tensorWidth * 2,
     xMax: 0,
-    yMin: tensorHeight,
+    yMin: tensorHeight * 2,
     yMax: 0,
   };
 
@@ -157,6 +159,7 @@ export const Pose: React.FC<PoseProps> = ({
   isBackCamera,
   tensorWidth,
   tensorHeight,
+  centerColor,
   center,
 }) => {
   if (poses.length > 0) {
@@ -172,7 +175,7 @@ export const Pose: React.FC<PoseProps> = ({
 
     const boxWidth = box.xMax - box.xMin;
     const boxHeight = box.yMax - box.yMin;
-    // console.log(boxWidth, boxHeight);
+    console.log(boxWidth, boxHeight);
 
     const originX = box.xMin + (boxWidth - CAM_PREVIEW_WIDTH) / 2;
     const originY = box.yMin + (boxHeight - CAM_PREVIEW_HEIGHT) / 2;
@@ -189,14 +192,6 @@ export const Pose: React.FC<PoseProps> = ({
             : ''
         }
         style={styles.base}>
-        <Circle
-          cx={averageXHead}
-          cy={averageYHead}
-          r="20"
-          strokeWidth="4"
-          stroke={addOpacity(colors.primaryDark, 0.1)}
-          fill="white"
-        />
         <PoseLine
           points={[pose.left_shoulder, pose.right_shoulder]}
           color={addOpacity(colors.primaryDark, 0.1)}
@@ -227,15 +222,29 @@ export const Pose: React.FC<PoseProps> = ({
           points={[pose.right_wrist, pose.right_elbow, pose.right_shoulder]}
         />
 
-        {Object.entries(pose)
-          .filter((f) => f[1].type !== 'head')
-          .map(([key, value]) => (
-            <PoseDot
-              key={key}
-              value={value}
-              color={value.type === 'arm' ? colors.primary : colors.primaryDark}
-            />
-          ))}
+        {Object.entries(pose).map(([key, value]) => (
+          <PoseDot
+            key={key}
+            value={value}
+            color={
+              {
+                head: addOpacity(colors.primary, 0.4),
+                leg: colors.primaryDark,
+                arm: colors.primary,
+              }[value.type!]
+            }
+          />
+        ))}
+
+        {center && (
+          <Polyline
+            id="box"
+            points={`${box.xMin},${box.yMin} ${box.xMax},${box.yMin} ${box.xMax},${box.yMax} ${box.xMin},${box.yMax} ${box.xMin},${box.yMin}`}
+            stroke={addOpacity(centerColor ?? colors.primary, 0.1)}
+            strokeWidth="4"
+            fill="none"
+          />
+        )}
       </Svg>
     );
   } else {

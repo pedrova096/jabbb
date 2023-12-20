@@ -21,6 +21,7 @@ export default function SavedPoses() {
       <Text>{capturedPoses.length}</Text>
       <FlashList
         data={capturedPoses}
+        estimatedItemSize={112}
         contentContainerStyle={styles.listContent}
         keyExtractor={(item) => `${item.capturedAt}`}
         renderItem={({ item, index }) => (

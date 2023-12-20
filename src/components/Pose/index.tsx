@@ -2,36 +2,14 @@ import { Keypoint, Pose as PoseType } from '@tensorflow-models/pose-detection';
 import { StyleSheet, View } from 'react-native';
 import { IS_ANDROID } from '~/constants/config';
 import { Circle, Polyline, Svg } from 'react-native-svg';
-import { CAM_PREVIEW_HEIGHT, CAM_PREVIEW_WIDTH } from '../TensorCamera';
+import {
+  CAM_PREVIEW_ASPECT_RATIO,
+  CAM_PREVIEW_HEIGHT,
+  CAM_PREVIEW_WIDTH,
+} from '../TensorCamera';
 import { colors, addOpacity } from '~/constants/theme';
 import React from 'react';
-
-export enum KeyPointName {
-  nose = 'nose',
-  left_eye = 'left_eye',
-  right_eye = 'right_eye',
-
-  left_ear = 'left_ear',
-  right_ear = 'right_ear',
-
-  left_shoulder = 'left_shoulder',
-  right_shoulder = 'right_shoulder',
-
-  left_elbow = 'left_elbow',
-  right_elbow = 'right_elbow',
-
-  left_wrist = 'left_wrist',
-  right_wrist = 'right_wrist',
-
-  left_hip = 'left_hip',
-  right_hip = 'right_hip',
-
-  left_knee = 'left_knee',
-  right_knee = 'right_knee',
-
-  left_ankle = 'left_ankle',
-  right_ankle = 'right_ankle',
-}
+import { KeyPointName } from '~/types';
 
 interface PoseProps {
   poses: PoseType[];
@@ -39,6 +17,7 @@ interface PoseProps {
   isPortrait: boolean;
   tensorWidth: number;
   tensorHeight: number;
+  center?: boolean;
 }
 
 type PoseObject = {
@@ -56,7 +35,7 @@ const MIN_KEYPOINT_SCORE = 0.3;
 const styles = StyleSheet.create({
   base: {
     width: '100%',
-    height: '100%',
+    aspectRatio: CAM_PREVIEW_ASPECT_RATIO,
     position: 'absolute',
     zIndex: 30,
   },
@@ -76,6 +55,12 @@ const convertPoseToPoseObject = ({
   tensorHeight: number;
 }) => {
   const poseObject: PoseObject = {};
+  const box = {
+    xMin: tensorWidth,
+    xMax: 0,
+    yMin: tensorHeight,
+    yMax: 0,
+  };
 
   pose.keypoints.forEach((k) => {
     if (k.score && k.score > MIN_KEYPOINT_SCORE) {
@@ -88,6 +73,19 @@ const convertPoseToPoseObject = ({
       const cy =
         (y / tensorHeight) *
         (isPortrait ? CAM_PREVIEW_HEIGHT : CAM_PREVIEW_WIDTH);
+
+      if (cx < box.xMin) {
+        box.xMin = cx;
+      }
+      if (cx > box.xMax) {
+        box.xMax = cx;
+      }
+      if (cy < box.yMin) {
+        box.yMin = cy;
+      }
+      if (cy > box.yMax) {
+        box.yMax = cy;
+      }
 
       poseObject[k.name as KeyPointName] = {
         cx,
@@ -102,7 +100,7 @@ const convertPoseToPoseObject = ({
     }
   });
 
-  return poseObject;
+  return { pose: poseObject, box };
 };
 
 const PoseDot: React.FC<{
@@ -159,11 +157,12 @@ export const Pose: React.FC<PoseProps> = ({
   isBackCamera,
   tensorWidth,
   tensorHeight,
+  center,
 }) => {
   if (poses.length > 0) {
     const flipX = IS_ANDROID || isBackCamera;
 
-    const pose = convertPoseToPoseObject({
+    const { pose, box } = convertPoseToPoseObject({
       pose: poses[0],
       flipX,
       isPortrait,
@@ -171,12 +170,25 @@ export const Pose: React.FC<PoseProps> = ({
       tensorHeight,
     });
 
+    const boxWidth = box.xMax - box.xMin;
+    const boxHeight = box.yMax - box.yMin;
+    // console.log(boxWidth, boxHeight);
+
+    const originX = box.xMin + (boxWidth - CAM_PREVIEW_WIDTH) / 2;
+    const originY = box.yMin + (boxHeight - CAM_PREVIEW_HEIGHT) / 2;
+
     const head = Object.values(pose).filter((p) => p?.type === 'head');
     const averageYHead = head.reduce((acc, h) => acc + h!.cy, 0) / head.length;
     const averageXHead = head.reduce((acc, h) => acc + h!.cx, 0) / head.length;
 
     return (
-      <Svg style={styles.base}>
+      <Svg
+        viewBox={
+          center
+            ? `${originX} ${originY} ${CAM_PREVIEW_WIDTH} ${CAM_PREVIEW_HEIGHT}`
+            : ''
+        }
+        style={styles.base}>
         <Circle
           cx={averageXHead}
           cy={averageYHead}

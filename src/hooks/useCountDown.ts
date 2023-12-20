@@ -10,7 +10,6 @@ export const useCountDown = ({ seconds, onEnd }: UseCountDown) => {
   const [play, setPlay] = useState(false);
 
   useEffect(() => {
-    console.log(`Countdown is ${count} and is ${play ? 'playing' : 'paused'}`);
     // edge cases
     // 1. count is 0 and is not playing -> default
     // 3. count > 0 and is not playing -> default

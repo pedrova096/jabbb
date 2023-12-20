@@ -135,7 +135,10 @@ export default function App() {
                 Reps:
               </Text>
               <Text color="light" style={styles.timeValue}>
-                {reps}/{poseStatus}
+                {reps}
+                <Text color="light" style={styles.poseValue}>
+                  /{poseStatus}
+                </Text>
               </Text>
             </View>
           </View>
@@ -223,6 +226,9 @@ const styles = StyleSheet.create({
   },
   timeValue: {
     fontSize: 64,
+  },
+  poseValue: {
+    fontSize: 32,
   },
   actionButtonContainer: {
     flexGrow: 0.1,

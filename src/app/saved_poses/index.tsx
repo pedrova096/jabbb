@@ -3,6 +3,7 @@ import { Pose as PoseType } from '@tensorflow-models/pose-detection';
 import { Link } from 'expo-router';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '~/components/Text';
+import { sidesGap } from '~/constants/theme';
 import { useCapturedPoses } from '~/hooks/useCapturedPoses';
 
 export default function SavedPoses() {
@@ -20,16 +21,11 @@ export default function SavedPoses() {
       <Text>{capturedPoses.length}</Text>
       <FlashList
         data={capturedPoses}
+        contentContainerStyle={styles.listContent}
         keyExtractor={(item) => `${item.capturedAt}`}
         renderItem={({ item, index }) => (
           <Link href={`/saved_poses/${index}`} asChild>
-            <TouchableOpacity
-              style={{
-                flexDirection: 'column',
-                paddingVertical: 10,
-                borderBottomWidth: 1,
-                width: '100%',
-              }}>
+            <TouchableOpacity style={styles.cardContainer}>
               <Text fontMode="bold" style={styles.cardTitle}>
                 Pose {index}
               </Text>
@@ -53,7 +49,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 24,
   },
   cardTitle: {
     fontSize: 24,
@@ -62,5 +57,15 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 12,
     opacity: 0.8,
+  },
+  listContent: {
+    paddingHorizontal: 5,
+  },
+  cardContainer: {
+    flexDirection: 'column',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    paddingHorizontal: sidesGap - 5,
+    width: '100%',
   },
 });

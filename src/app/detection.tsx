@@ -1,57 +1,46 @@
 import { StyleSheet, View } from 'react-native';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Loading } from '~/components/Loading';
 import { TensorCamera } from '~/components/TensorCamera';
 import { usePoseDetectionModel } from '~/hooks/usePoseDetectionModel';
 import { useTensorSize } from '~/hooks/useTensorSize';
 import { useOrientation } from '~/hooks/useOrientation';
-import type { Camera } from 'expo-camera';
 import { Pose } from '~/components/Pose';
 import { addOpacity, colors, sidesGap } from '~/constants/theme';
-import { Button } from '~/components/Button';
-import { Text } from '~/components/Text';
 import { useCountDown } from '~/hooks/useCountDown';
-import { Modal } from '~/components/Modal';
-import { AnimatePresence, MotiView } from 'moti';
-import { useCapturedPoses } from '~/hooks/useCapturedPoses';
 import { usePoseCounter } from '~/hooks/usePoseCounter';
+import { CameraActions } from '~/page/detection';
+import { ModalCountDown } from '~/page/detection/ModalCountDown';
+import { StreamingActions } from '~/page/detection/StreamingActions';
 
 export default function App() {
   const [trainingSeconds, setTrainingSeconds] = useState(0);
+
   const {
     isLoading,
     poses = [],
     onCameraStream,
     handleCameraReady,
+    isStreamRunning,
     runStream,
     stopStream,
   } = usePoseDetectionModel({
     autostart: false,
   });
   const { isPortrait } = useOrientation();
-  const { tensorWidth, tensorHeight } = useTensorSize({
-    isPortrait,
-  });
-  const {
-    count: training,
-    startCountDown: startTrainingTimer,
-    isPlaying: isTraining,
-  } = useCountDown({
+  const { tensorWidth, tensorHeight } = useTensorSize({ isPortrait });
+  const { count: training, startCountDown: startTrainingTimer } = useCountDown({
     seconds: trainingSeconds,
-    onEnd: () => {},
+    onEnd: stopStream,
   });
-  const { count, isPlaying, startCountDown } = useCountDown({
-    seconds: 5,
-    onEnd: () => {
-      startTrainingTimer();
-    },
-  });
+  const { count: repsCount, status: poseStatus } = usePoseCounter(
+    poses,
+    isStreamRunning
+  );
 
-  const { count: reps, status: poseStatus } = usePoseCounter(poses, isTraining);
-
-  const handleStart = () => {
+  const handleStart = (time: number) => {
     runStream();
-    startCountDown();
+    setTrainingSeconds(time);
   };
 
   if (isLoading) {
@@ -60,20 +49,11 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Modal open={isPlaying}>
-        <AnimatePresence exitBeforeEnter>
-          <MotiView
-            key={count}
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 300 }}
-            exit={{ opacity: 0, translateY: -10 }}>
-            <Text color="light" style={styles.countdownText}>
-              {count}
-            </Text>
-          </MotiView>
-        </AnimatePresence>
-      </Modal>
+      <ModalCountDown
+        execute={isStreamRunning}
+        seconds={5}
+        onEnd={startTrainingTimer}
+      />
       <View style={styles.cameraContainer}>
         <TensorCamera
           onReady={onCameraStream}
@@ -81,6 +61,26 @@ export default function App() {
           resizeWidth={tensorWidth}
           resizeHeight={tensorHeight}
         />
+        {/* {indexs.map((item, i) => (
+          <MotiView
+            key={item.id}
+            style={{
+              position: 'absolute',
+              left: 10,
+              bottom: 10,
+              zIndex: 30,
+              paddingHorizontal: 10,
+              paddingVertical: 5,
+              borderRadius: 10,
+              backgroundColor: 'rgb(4 120 87)',
+            }}
+            from={{ opacity: 0, translateY: 0 }}
+            animate={{ opacity: 1, translateY: -40 * i }}
+            transition={{ type: 'timing', duration: 300 }}
+            exit={{ opacity: 0, translateX: -50 * i }}>
+            <Text color="light">{item.name}</Text>
+          </MotiView>
+        ))} */}
         <Pose
           isBackCamera={false}
           isPortrait={isPortrait}
@@ -89,66 +89,19 @@ export default function App() {
           tensorHeight={tensorHeight}
         />
       </View>
-      {!isTraining ? (
-        <View style={styles.buttonContainer}>
-          <View style={styles.buttonRow}>
-            {[30, 40, 60].map((value, i) => (
-              <Button
-                key={value}
-                color={trainingSeconds === value ? 'light' : 'outlineLight'}
-                style={[styles.button, i === 0 && styles.buttonFirst]}
-                onPress={() => setTrainingSeconds(value)}>
-                <Text
-                  color={trainingSeconds === value ? 'primary' : 'light'}
-                  style={styles.buttonText}>
-                  {value}
-                </Text>
-                <Text
-                  color={trainingSeconds === value ? 'primary' : 'light'}
-                  style={styles.buttonTextSmall}>
-                  sec
-                </Text>
-              </Button>
-            ))}
-          </View>
-          <Button
-            color="primary"
-            onPress={handleStart}
-            disabled={!trainingSeconds}>
-            Capture
-          </Button>
-        </View>
+      {!isStreamRunning ? (
+        <CameraActions
+          secondsList={[30, 40, 60, Infinity]}
+          onStart={handleStart}
+        />
       ) : (
-        <View style={styles.actionContainer}>
-          <View style={styles.actionLeftContainer}>
-            <View style={styles.actionSubContainer}>
-              <Text color="light" style={styles.timeLabel}>
-                Training:
-              </Text>
-              <Text color="light" style={styles.timeValue}>
-                {training}
-              </Text>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.actionSubContainer}>
-              <Text color="light" style={styles.timeLabel}>
-                Reps:
-              </Text>
-              <Text color="light" style={styles.timeValue}>
-                {reps}
-                <Text color="light" style={styles.poseValue}>
-                  /{poseStatus}
-                </Text>
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.actionButtonContainer}>
-            <Button color="outlinePrimary" onPress={stopStream}>
-              Stop
-            </Button>
-          </View>
-        </View>
+        <StreamingActions
+          isInfinite={trainingSeconds === Infinity}
+          timerCount={training}
+          onStreamStop={stopStream}
+          repsCount={repsCount}
+          poseStatus={poseStatus}
+        />
       )}
     </View>
   );
@@ -163,39 +116,6 @@ const styles = StyleSheet.create({
     borderBottomEndRadius: 20,
     borderBottomStartRadius: 20,
     overflow: 'hidden',
-  },
-  buttonContainer: {
-    flex: 1,
-    paddingHorizontal: sidesGap,
-    justifyContent: 'center',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    marginBottom: 10,
-  },
-  button: {
-    flex: 1,
-    marginLeft: 10,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingVertical: 4,
-  },
-  buttonFirst: {
-    marginLeft: 0,
-  },
-  buttonText: {
-    fontSize: 20,
-    textAlignVertical: 'bottom',
-  },
-  buttonTextSmall: {
-    fontSize: 12,
-    lineHeight: 22,
-    marginLeft: 2,
-    textAlignVertical: 'bottom',
-    opacity: 0.6,
-  },
-  countdownText: {
-    fontSize: 80,
   },
 
   actionContainer: {

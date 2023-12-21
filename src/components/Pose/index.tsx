@@ -175,7 +175,7 @@ export const Pose: React.FC<PoseProps> = ({
 
     const boxWidth = box.xMax - box.xMin;
     const boxHeight = box.yMax - box.yMin;
-    console.log(boxWidth, boxHeight);
+    //console.log(boxWidth, boxHeight);
 
     const originX = box.xMin + (boxWidth - CAM_PREVIEW_WIDTH) / 2;
     const originY = box.yMin + (boxHeight - CAM_PREVIEW_HEIGHT) / 2;

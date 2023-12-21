@@ -18,7 +18,7 @@ enum ModelStatus {
   FAILED,
 }
 
-enum StreamStatus {
+export enum StreamStatus {
   IDLE = 'IDLE',
   READY = 'READY',
   RUNNING = 'RUNNING',
@@ -193,5 +193,6 @@ export const usePoseDetectionModel = (
     handleCameraReady,
     runStream,
     stopStream,
+    isStreamRunning: streamStatus === StreamStatus.RUNNING,
   };
 };

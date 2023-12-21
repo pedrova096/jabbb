@@ -9,9 +9,11 @@ import { Pose } from '~/components/Pose';
 import { addOpacity, colors, sidesGap } from '~/constants/theme';
 import { useCountDown } from '~/hooks/useCountDown';
 import { usePoseCounter } from '~/hooks/usePoseCounter';
-import { CameraActions } from '~/page/detection';
-import { ModalCountDown } from '~/page/detection/ModalCountDown';
-import { StreamingActions } from '~/page/detection/StreamingActions';
+import {
+  CameraActions,
+  ModalCountDown,
+  StreamingActions,
+} from '~/page/detection';
 
 export default function App() {
   const [trainingSeconds, setTrainingSeconds] = useState(0);
@@ -117,7 +119,6 @@ const styles = StyleSheet.create({
     borderBottomStartRadius: 20,
     overflow: 'hidden',
   },
-
   actionContainer: {
     flexDirection: 'row',
     alignItems: 'center',

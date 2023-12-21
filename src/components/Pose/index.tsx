@@ -1,7 +1,7 @@
-import { Keypoint, Pose as PoseType } from '@tensorflow-models/pose-detection';
+import { Pose as PoseType } from '@tensorflow-models/pose-detection';
 import { StyleSheet, View } from 'react-native';
 import { IS_ANDROID } from '~/constants/config';
-import { Circle, Polyline, Svg } from 'react-native-svg';
+import { Circle, G, Polyline, Svg } from 'react-native-svg';
 import {
   CAM_PREVIEW_ASPECT_RATIO,
   CAM_PREVIEW_HEIGHT,
@@ -9,9 +9,13 @@ import {
 } from '../TensorCamera';
 import { colors, addOpacity } from '~/constants/theme';
 import React from 'react';
-import { KeyPointName } from '~/types';
+import {
+  PoseObject,
+  centerBoundingBoxInViewport,
+  convertPoseToPoseObject,
+} from '~/utils/keypoints.handler';
 
-interface PoseProps {
+export interface PoseProps {
   poses: PoseType[];
   isBackCamera: boolean;
   isPortrait: boolean;
@@ -20,18 +24,6 @@ interface PoseProps {
   center?: boolean;
   centerColor?: string;
 }
-
-type PoseObject = {
-  [key in KeyPointName]?: {
-    cx: number;
-    cy: number;
-    score: number;
-    type?: 'head' | 'arm' | 'leg';
-  };
-};
-
-// The score threshold for pose detection results.
-const MIN_KEYPOINT_SCORE = 0.3;
 
 const styles = StyleSheet.create({
   base: {
@@ -42,70 +34,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const convertPoseToPoseObject = ({
-  pose,
-  flipX,
-  isPortrait,
-  tensorWidth,
-  tensorHeight,
-}: {
-  pose: PoseType;
-  flipX: boolean;
-  isPortrait: boolean;
-  tensorWidth: number;
-  tensorHeight: number;
-}) => {
-  const poseObject: PoseObject = {};
-
-  const box = {
-    xMin: tensorWidth * 2,
-    xMax: 0,
-    yMin: tensorHeight * 2,
-    yMax: 0,
-  };
-
-  pose.keypoints.forEach((k) => {
-    if (k.score && k.score > MIN_KEYPOINT_SCORE) {
-      // Flip horizontally on android or when using back camera on iOS.
-      const x = flipX ? tensorWidth - k.x : k.x;
-      const y = k.y;
-      const cx =
-        (x / tensorWidth) *
-        (isPortrait ? CAM_PREVIEW_WIDTH : CAM_PREVIEW_HEIGHT);
-      const cy =
-        (y / tensorHeight) *
-        (isPortrait ? CAM_PREVIEW_HEIGHT : CAM_PREVIEW_WIDTH);
-
-      if (cx < box.xMin) {
-        box.xMin = cx;
-      }
-      if (cx > box.xMax) {
-        box.xMax = cx;
-      }
-      if (cy < box.yMin) {
-        box.yMin = cy;
-      }
-      if (cy > box.yMax) {
-        box.yMax = cy;
-      }
-
-      poseObject[k.name as KeyPointName] = {
-        cx,
-        cy,
-        score: k.score,
-        type: ['eye', 'ear', 'nose'].some((t) => k.name!.includes(t))
-          ? 'head'
-          : ['wrist', 'elbow', 'shoulder'].some((t) => k.name!.includes(t))
-          ? 'arm'
-          : 'leg',
-      };
-    }
-  });
-
-  return { pose: poseObject, box };
-};
-
-const PoseDot: React.FC<{
+const KeyPointNodes: React.FC<{
   value: PoseObject[keyof PoseObject];
   color?: string;
 }> = ({ value, color = colors.primary }) => {
@@ -125,7 +54,7 @@ const PoseDot: React.FC<{
   }
 };
 
-const PoseLine: React.FC<{
+const KeyLineEdges: React.FC<{
   points: Array<PoseObject[keyof PoseObject]>;
   color?: string;
 }> = ({ points, color = colors.primary }) => {
@@ -173,69 +102,12 @@ export const Pose: React.FC<PoseProps> = ({
       tensorHeight,
     });
 
-    const boxWidth = box.xMax - box.xMin;
-    const boxHeight = box.yMax - box.yMin;
-    //console.log(boxWidth, boxHeight);
-
-    const originX = box.xMin + (boxWidth - CAM_PREVIEW_WIDTH) / 2;
-    const originY = box.yMin + (boxHeight - CAM_PREVIEW_HEIGHT) / 2;
-
-    const head = Object.values(pose).filter((p) => p?.type === 'head');
-    const averageYHead = head.reduce((acc, h) => acc + h!.cy, 0) / head.length;
-    const averageXHead = head.reduce((acc, h) => acc + h!.cx, 0) / head.length;
+    const viewBox = center
+      ? centerBoundingBoxInViewport(box, CAM_PREVIEW_WIDTH, CAM_PREVIEW_HEIGHT)
+      : '';
 
     return (
-      <Svg
-        viewBox={
-          center
-            ? `${originX} ${originY} ${CAM_PREVIEW_WIDTH} ${CAM_PREVIEW_HEIGHT}`
-            : ''
-        }
-        style={styles.base}>
-        <PoseLine
-          points={[pose.left_shoulder, pose.right_shoulder]}
-          color={addOpacity(colors.primaryDark, 0.1)}
-        />
-
-        <PoseLine
-          points={[pose.left_shoulder, pose.left_hip]}
-          color={addOpacity(colors.primaryDark, 0.4)}
-        />
-        <PoseLine
-          points={[pose.left_hip, pose.left_knee, pose.left_ankle]}
-          color={colors.primaryDark}
-        />
-
-        <PoseLine
-          points={[pose.right_shoulder, pose.right_hip]}
-          color={addOpacity(colors.primaryDark, 0.4)}
-        />
-        <PoseLine
-          points={[pose.right_hip, pose.right_knee, pose.right_ankle]}
-          color={colors.primaryDark}
-        />
-
-        <PoseLine
-          points={[pose.left_wrist, pose.left_elbow, pose.left_shoulder]}
-        />
-        <PoseLine
-          points={[pose.right_wrist, pose.right_elbow, pose.right_shoulder]}
-        />
-
-        {Object.entries(pose).map(([key, value]) => (
-          <PoseDot
-            key={key}
-            value={value}
-            color={
-              {
-                head: addOpacity(colors.primary, 0.4),
-                leg: colors.primaryDark,
-                arm: colors.primary,
-              }[value.type!]
-            }
-          />
-        ))}
-
+      <PoseBase viewBox={viewBox} pose={pose}>
         {center && (
           <Polyline
             id="box"
@@ -245,9 +117,85 @@ export const Pose: React.FC<PoseProps> = ({
             fill="none"
           />
         )}
-      </Svg>
+      </PoseBase>
     );
   } else {
     return <View></View>;
   }
+};
+
+export interface PoseBaseProps {
+  viewBox?: string;
+  pose: PoseObject;
+  children?: React.ReactNode;
+  opacity?: number;
+  themeColors?: {
+    primary: string;
+    primaryDark: string;
+  };
+}
+
+export const PoseBase: React.FC<PoseBaseProps> = ({
+  viewBox,
+  pose,
+  children,
+  opacity = 1,
+  themeColors = {
+    primary: colors.primary,
+    primaryDark: colors.primaryDark,
+  },
+}) => {
+  return (
+    <Svg viewBox={viewBox} style={styles.base}>
+      <G opacity={opacity}>
+        <KeyLineEdges
+          points={[pose.left_shoulder, pose.right_shoulder]}
+          color={addOpacity(themeColors.primaryDark, 0.1)}
+        />
+
+        <KeyLineEdges
+          points={[pose.left_shoulder, pose.left_hip]}
+          color={addOpacity(themeColors.primaryDark, 0.4)}
+        />
+        <KeyLineEdges
+          points={[pose.left_hip, pose.left_knee, pose.left_ankle]}
+          color={themeColors.primaryDark}
+        />
+
+        <KeyLineEdges
+          points={[pose.right_shoulder, pose.right_hip]}
+          color={addOpacity(themeColors.primaryDark, 0.4)}
+        />
+        <KeyLineEdges
+          points={[pose.right_hip, pose.right_knee, pose.right_ankle]}
+          color={themeColors.primaryDark}
+        />
+
+        <KeyLineEdges
+          points={[pose.left_wrist, pose.left_elbow, pose.left_shoulder]}
+          color={themeColors.primary}
+        />
+        <KeyLineEdges
+          points={[pose.right_wrist, pose.right_elbow, pose.right_shoulder]}
+          color={themeColors.primary}
+        />
+
+        {Object.entries(pose).map(([key, value]) => (
+          <KeyPointNodes
+            key={key}
+            value={value}
+            color={
+              {
+                head: addOpacity(themeColors.primary, 0.4),
+                leg: themeColors.primaryDark,
+                arm: themeColors.primary,
+              }[value.type!]
+            }
+          />
+        ))}
+      </G>
+
+      {children}
+    </Svg>
+  );
 };

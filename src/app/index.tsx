@@ -18,8 +18,13 @@ const styles = StyleSheet.create({
 export default function Home() {
   return (
     <View style={styles.container}>
+      <Link href="/match" asChild>
+        <Button color="primary">Match Pose</Button>
+      </Link>
       <Link href="/detection" asChild>
-        <Button color="primary">Detect</Button>
+        <Button color="primary" style={styles.mt10}>
+          Detect Pose
+        </Button>
       </Link>
       <Link href="/capture_pose" asChild>
         <Button color="primary" style={styles.mt10}>

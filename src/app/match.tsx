@@ -7,8 +7,12 @@ import { useTensorSize } from '~/hooks/useTensorSize';
 import { useOrientation } from '~/hooks/useOrientation';
 import { Pose } from '~/components/Pose';
 import { addOpacity, colors, sidesGap } from '~/constants/theme';
-import { base as BASE_POSE } from '~/constants/poses';
-import { applyNoseOffset, findKeypointByName } from '~/utils/keypoints.handler';
+import { base as BASE_POSE, punch as JAB_POSE } from '~/constants/poses';
+import {
+  adjustPose_VERY_CRAZY_,
+  applyNoseOffset,
+  findKeypointByName,
+} from '~/utils/keypoints.handler';
 import { KeyPointName } from '~/types';
 import { MatchPose } from '~/page/match/MatchPose';
 
@@ -55,7 +59,10 @@ export default function App() {
           <MatchPose
             isBackCamera={false}
             isPortrait={isPortrait}
-            basePose={applyNoseOffset(BASE_POSE, nose.x, nose.y)}
+            basePose={adjustPose_VERY_CRAZY_(
+              applyNoseOffset(JAB_POSE, nose.x, nose.y),
+              poses[0]
+            )}
             poses={poses}
             tensorWidth={tensorWidth}
             tensorHeight={tensorHeight}

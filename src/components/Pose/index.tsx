@@ -23,6 +23,8 @@ export interface PoseProps {
   tensorHeight: number;
   center?: boolean;
   centerColor?: string;
+
+  themeColors?: ThemeColors;
 }
 
 const styles = StyleSheet.create({
@@ -90,6 +92,7 @@ export const Pose: React.FC<PoseProps> = ({
   tensorHeight,
   centerColor,
   center,
+  themeColors,
 }) => {
   if (poses.length > 0) {
     const flipX = IS_ANDROID || isBackCamera;
@@ -107,7 +110,7 @@ export const Pose: React.FC<PoseProps> = ({
       : '';
 
     return (
-      <PoseBase viewBox={viewBox} pose={pose}>
+      <PoseBase viewBox={viewBox} pose={pose} themeColors={themeColors}>
         {center && (
           <Polyline
             id="box"
@@ -124,15 +127,16 @@ export const Pose: React.FC<PoseProps> = ({
   }
 };
 
+type ThemeColors = {
+  primary: string;
+  primaryDark: string;
+};
 export interface PoseBaseProps {
   viewBox?: string;
   pose: PoseObject;
   children?: React.ReactNode;
   opacity?: number;
-  themeColors?: {
-    primary: string;
-    primaryDark: string;
-  };
+  themeColors?: ThemeColors;
 }
 
 export const PoseBase: React.FC<PoseBaseProps> = ({

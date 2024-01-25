@@ -195,3 +195,39 @@ export const centerBoundingBoxInViewport = (
 
   return `${originX} ${originY} ${viewportWidth} ${viewportHeight}`;
 };
+
+export const adjustPose_VERY_CRAZY_ = (
+  poseA: PoseType,
+  poseB: PoseType
+): PoseType => {
+  // so here we want to move shoulderA to shoulderB position
+  const shoulderLeftA = findKeypointByName(poseA, KeyPointName.left_shoulder);
+  const shoulderRightA = findKeypointByName(poseA, KeyPointName.right_shoulder);
+
+  const shoulderLeftB = findKeypointByName(poseB, KeyPointName.left_shoulder);
+  const shoulderRightB = findKeypointByName(poseB, KeyPointName.right_shoulder);
+
+  const dLeftX = shoulderLeftB.x - shoulderLeftA.x;
+  const dRightX = shoulderRightB.x - shoulderRightA.x;
+  // move every keypoints that starts with left_ or right_
+  const newPose: PoseType = {
+    score: poseA.score,
+    keypoints: poseA.keypoints.map((k) => {
+      if (k.name!.startsWith('left_')) {
+        return {
+          ...k,
+          x: k.x + dLeftX,
+        };
+      }
+      if (k.name!.startsWith('right_')) {
+        return {
+          ...k,
+          x: k.x + dRightX,
+        };
+      }
+      return k;
+    }),
+  };
+
+  return newPose;
+};
